@@ -3,7 +3,7 @@ let s:sep = has('win32') ? '\' : '/'
 
 function! vim_channel_test#start() abort
   let script = join([s:root, 'script', 'server.ts'], s:sep)
-  call job_start(['deno', 'run', '-A', script], {
+  let s:job = job_start(['deno', 'run', '-A', script], {
         \ 'mode': 'json',
         \ 'err_mode': 'nl',
         \ 'pty': 0,
@@ -27,6 +27,10 @@ function! s:exit_cb(job, status) abort
   echomsg "Server closed"
 endfunction
 
-function! vim_channel_test#verify(n, buffer) abort
-  return [a:n, len(a:buffer) is# a:n]
+function! vim_channel_test#test() abort
+  let text = readfile(join([s:root, 'test.txt'], s:sep))
+  let result = ch_sendexpr(s:job, text, {
+        \ 'timeout': 2000,
+        \})
+  echomsg string(result)
 endfunction
