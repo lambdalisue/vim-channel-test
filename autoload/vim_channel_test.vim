@@ -13,6 +13,7 @@ function! vim_channel_test#start() abort
         \ 'err_cb': funcref('s:err_cb'),
         \ 'exit_cb': funcref('s:exit_cb'),
         \})
+  echomsg "Started"
 endfunction
 
 function! s:err_cb(chan, msg) abort
@@ -27,8 +28,16 @@ function! s:exit_cb(job, status) abort
   echomsg "Server closed"
 endfunction
 
-function! vim_channel_test#test() abort
-  let text = readfile(join([s:root, 'test.txt'], s:sep))
+function! vim_channel_test#test1() abort
+  let text = readfile(join([s:root, 'test1.txt'], s:sep))
+  let result = ch_sendexpr(s:job, text, {
+        \ 'timeout': 2000,
+        \})
+  echomsg string(result)
+endfunction
+
+function! vim_channel_test#test2() abort
+  let text = readfile(join([s:root, 'test2.txt'], s:sep))
   let result = ch_sendexpr(s:job, text, {
         \ 'timeout': 2000,
         \})
