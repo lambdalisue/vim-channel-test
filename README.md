@@ -1,8 +1,7 @@
 # How to test
 
 ```
-:call vim_channel_test#start()
-:call vim_channel_test#test1()
-:call vim_channel_test#test2()
+:call vim_channel_test#request(repeat("0123456789", 100))
+:call vim_channel_test#notify(repeat("0123456789", 100))
 :mes
 ```

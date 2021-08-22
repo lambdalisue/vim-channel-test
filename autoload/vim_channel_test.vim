@@ -1,7 +1,7 @@
 let s:root = fnamemodify(expand('<sfile>'), ':p:h:h')
 let s:sep = has('win32') ? '\' : '/'
 
-function! vim_channel_test#start() abort
+function! s:start() abort
   let script = join([s:root, 'script', 'server.ts'], s:sep)
   let s:job = job_start(['deno', 'run', '-A', script], {
         \ 'mode': 'json',
@@ -13,7 +13,7 @@ function! vim_channel_test#start() abort
         \ 'err_cb': funcref('s:err_cb'),
         \ 'exit_cb': funcref('s:exit_cb'),
         \})
-  echomsg "Started"
+  echomsg "Server started"
 endfunction
 
 function! s:err_cb(chan, msg) abort
@@ -26,20 +26,23 @@ endfunction
 
 function! s:exit_cb(job, status) abort
   echomsg "Server closed"
+  silent! unlet! s:job
 endfunction
 
-function! vim_channel_test#test1() abort
-  let text = readfile(join([s:root, 'test1.txt'], s:sep))
-  let result = ch_sendexpr(s:job, text, {
+function! vim_channel_test#notify(data) abort
+  if !exists('s:job')
+    call s:start()
+  endif
+  return ch_sendraw(s:job, json_encode([0, a:data]) . "\n", {
         \ 'timeout': 2000,
         \})
-  echomsg string(result)
 endfunction
 
-function! vim_channel_test#test2() abort
-  let text = readfile(join([s:root, 'test2.txt'], s:sep))
-  let result = ch_sendexpr(s:job, text, {
+function! vim_channel_test#request(data) abort
+  if !exists('s:job')
+    call s:start()
+  endif
+  return ch_sendexpr(s:job, a:data, {
         \ 'timeout': 2000,
         \})
-  echomsg string(result)
 endfunction
